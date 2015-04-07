@@ -172,7 +172,7 @@ func Test1(t *testing.T) {
 			time.Sleep(PingInterval)
 		}
 		v, _ := ck3.Get()
-			fmt.Printf(" backup:", v.Backup, "primary:", v.Primary)
+			fmt.Println(" backup:", v.Backup, "primary:", v.Primary)
 		if v.Primary != ck3.me || v.Backup != "" {
 			t.Fatalf("wrong primary or backup")
 		}

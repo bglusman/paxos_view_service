@@ -47,8 +47,17 @@ func (v *View) PromoteBackup(newBackup string) {
   }
   v.Primary = v.Backup
   v.Backup = newBackup
-  fmt.Println("inc viewNum by Promote", v.Viewnum)
+  // fmt.Println("inc viewNum by Promote", v.Viewnum)
   v.Viewnum += 1
+  // fmt.Println("view for this promote:\t\t", v)
+}
+
+func (v *View) PromoteSpare(currentSpare string) {
+  v.Backup = currentSpare
+
+  // fmt.Println("inc viewNum by PromoteSpare", v.Viewnum)
+  v.Viewnum += 1
+  // fmt.Println("view for this promote2:\t\t", v)
 }
 
 func (v *View) AddBackup(backupId string) {
@@ -56,8 +65,9 @@ func (v *View) AddBackup(backupId string) {
     fmt.Println("WHOOPS")
   }
   v.Backup = backupId
-  fmt.Println("inc viewNum by AddBackup", v.Viewnum)
+  // fmt.Println("inc viewNum by AddBackup", v.Viewnum)
   v.Viewnum += 1
+  fmt.Println("view for this AddBackup:\t\t", v)
 }
 
 
