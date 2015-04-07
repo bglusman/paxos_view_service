@@ -12,6 +12,14 @@ type Clerk struct {
 	server string // viewservice's host:port
 }
 
+func (ck *Clerk) Me() string {
+	return ck.me
+}
+
+func (ck *Clerk) Server() string {
+	return ck.server
+}
+
 func MakeClerk(me string, server string) *Clerk {
 	ck := new(Clerk)
 	ck.me = me

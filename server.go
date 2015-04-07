@@ -42,12 +42,12 @@ type ViewServer struct {
 func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
   vs.mu.Lock()
   defer  vs.mu.Unlock()
-  fmt.Println("view for this ping:\t\t", vs.view)
+  // fmt.Println("view for this ping:\t\t", vs.view)
   // var currentRole Role
   state := ClientState{Name: args.Me, ViewNum: args.Viewnum, TimeSeen: time.Now()}
 
   if args.Me == vs.view.Primary && args.Viewnum == vs.view.Viewnum {
-    fmt.Println("primary acks view num:\t\t", vs.view.Viewnum)
+    // fmt.Println("primary acks view num:\t\t", vs.view.Viewnum)
     vs.primaryUnacked = false
   }
 
@@ -55,15 +55,15 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
   vs.clientStates[args.Me] = state
   if hasOldState && state.ViewNum == 0 {
     if vs.view.Primary == args.Me {
-      fmt.Println("promoting backup:", args.Me, "hotSpareClient:", vs.hotSpareClient)
+      // fmt.Println("promoting backup:", args.Me, "hotSpareClient:", vs.hotSpareClient)
     //   *vs.clientStates[args.Me].Status = Idle
     //   *vs.clientStates[vs.view.Backup].Status = Primary
     //   if vs.hotSpareClient != ""{
     //   *vs.clientStates[vs.hotSpareClient].Status = Backup
     // }
-      fmt.Println("PING updating view before primary acks")
+      // fmt.Println("PING updating view before primary acks")
       vs.primaryUnacked = true
-      fmt.Println("ping promote")
+      // fmt.Println("ping promote")
       vs.view.PromoteBackup(vs.hotSpareClient)
       vs.hotSpareClient = ""
     }
@@ -100,7 +100,7 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
   //    vs.view.Primary.Viewnum
   //  }
   // vs.view.Viewnum = args.Viewnum
-  fmt.Println("state:", state)
+  // fmt.Println("state:", state)
   // fmt.Println("status:", *state.Status)
   return nil
 }
@@ -129,7 +129,7 @@ func (vs *ViewServer) tick() {
   for _, state:= range vs.clientStates{
     // fmt.Println("state:", state)
     // fmt.Println("tick name:", name)
-    fmt.Println("view for this tick:\t\t", vs.view)
+    // fmt.Println("view for this tick:\t\t", vs.view)
     cutoffTime := state.TimeSeen.Add(PingInterval * DeadPings)
     if time.After(cutoffTime) {
       // fmt.Println("tick:\t\tafter cutoff:", name)
@@ -141,9 +141,9 @@ func (vs *ViewServer) tick() {
       //   if vs.hotSpareClient != ""{
       //   *vs.clientStates[vs.hotSpareClient].Status = Backup
       // }
-        fmt.Println("TICK updating view before primary acks")
+        // fmt.Println("TICK updating view before primary acks")
         vs.primaryUnacked = true
-        fmt.Println("tick promote")
+        // fmt.Println("tick promote")
         vs.view.PromoteBackup(vs.hotSpareClient)
         vs.hotSpareClient = ""
       }
