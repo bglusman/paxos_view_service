@@ -41,12 +41,12 @@ type View struct {
 }
 
 
-func (v *View) PromoteBackup() {
+func (v *View) PromoteBackup(newBackup string) {
   if v.Backup == "" {
     fmt.Println("WHOOPS PROMOTE")
   }
   v.Primary = v.Backup
-  v.Backup = ""
+  v.Backup = newBackup
   fmt.Println("inc viewNum by Promote", v.Viewnum)
   v.Viewnum += 1
 }

@@ -32,6 +32,7 @@ type ViewServer struct {
 
   // Your declarations here.
   view View      // current view on ViewServer
+  hotSpareClient string
 }
 
 func (vs *ViewServer) setupClientStates() {
@@ -53,15 +54,15 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
     if vs.view.Primary == args.Me {
       vs.mu.Lock()
       fmt.Println("promoting backup:", args.Me)
-      vs.view.PromoteBackup()
+      vs.view.PromoteBackup(vs.hotSpareClient)
       vs.mu.Unlock()
     }
-    if vs.view.Backup == args.Me {
-      vs.mu.Lock()
-      fmt.Println("dumping backup:", args.Me)
-      vs.view.Backup = ""
-      vs.mu.Unlock()
-    }
+    // if vs.view.Backup == args.Me {
+    //   vs.mu.Lock()
+    //   fmt.Println("dumping backup:", args.Me)
+    //   vs.view.Backup = ""
+    //   vs.mu.Unlock()
+    // }
     //client died, remove as primary/backup until ack?
   }
   if vs.view.Viewnum == 0 {
@@ -73,6 +74,10 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
       vs.mu.Lock()
       vs.view.AddBackup(args.Me)
       vs.mu.Unlock()
+    } else {
+      if vs.view.Primary != args.Me && vs.view.Backup != args.Me {
+        vs.hotSpareClient = args.Me
+      }
     }
   }
   reply.View = vs.view
@@ -117,7 +122,7 @@ func (vs *ViewServer) tick() {
     if time.After(cutoffTime)  {
       fmt.Println("after cutoff:", name)
       if vs.view.Primary == name {
-        vs.view.PromoteBackup()
+        vs.view.PromoteBackup(vs.hotSpareClient)
       }
     }
 
