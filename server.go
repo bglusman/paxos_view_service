@@ -36,18 +36,13 @@ type ViewServer struct {
   primaryUnacked bool
 }
 
-func (vs *ViewServer) setupClientStates() {
-  if vs.clientStates == nil {
-    vs.clientStates = make(map[string]ClientState)
-  }
-}
-
 //
 // server Ping RPC handler.
 //
 func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
+  vs.mu.Lock()
+  defer  vs.mu.Unlock()
   fmt.Println("view for this ping:\t\t", vs.view)
-  vs.setupClientStates()
   // var currentRole Role
   state := ClientState{Name: args.Me, ViewNum: args.Viewnum, TimeSeen: time.Now()}
 
@@ -60,7 +55,6 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
   vs.clientStates[args.Me] = state
   if hasOldState && state.ViewNum == 0 {
     if vs.view.Primary == args.Me {
-      vs.mu.Lock()
       fmt.Println("promoting backup:", args.Me, "hotSpareClient:", vs.hotSpareClient)
     //   *vs.clientStates[args.Me].Status = Idle
     //   *vs.clientStates[vs.view.Backup].Status = Primary
@@ -72,7 +66,6 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
       fmt.Println("ping promote")
       vs.view.PromoteBackup(vs.hotSpareClient)
       vs.hotSpareClient = ""
-      vs.mu.Unlock()
     }
     // if vs.view.Backup == args.Me {
     //   vs.mu.Lock()
@@ -83,20 +76,18 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
     //client died, remove as primary/backup until ack?
   }
   if vs.view.Viewnum == 0 {
-    vs.mu.Lock()
     vs.view = View{Viewnum: 1, Primary: args.Me }
-    vs.mu.Unlock()
   } else if !vs.primaryUnacked {
     if vs.view.Backup == "" && vs.view.Primary != args.Me  {
-      vs.mu.Lock()
       vs.view.AddBackup(args.Me)
       vs.primaryUnacked = true
-      vs.mu.Unlock()
     }
   }
+
   if vs.view.Primary != args.Me && vs.view.Backup != args.Me {
     vs.hotSpareClient = args.Me
   }
+
   reply.View = vs.view
 
 
@@ -132,6 +123,8 @@ func (vs *ViewServer) Get(args *GetArgs, reply *GetReply) error {
 // accordingly.
 //
 func (vs *ViewServer) tick() {
+  vs.mu.Lock()
+  defer  vs.mu.Unlock()
   time := time.Now()
   for _, state:= range vs.clientStates{
     // fmt.Println("state:", state)
@@ -192,7 +185,7 @@ func StartServer(me string) *ViewServer {
   vs := new(ViewServer)
   vs.me = me
   // Your vs.* initializations here.
-
+  vs.clientStates = make(map[string]ClientState)
   // tell net/rpc about our RPC server and handlers.
   rpcs := rpc.NewServer()
   rpcs.Register(vs)
