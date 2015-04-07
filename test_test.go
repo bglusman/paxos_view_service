@@ -191,6 +191,7 @@ func Test1(t *testing.T) {
 			ck1.Ping(0)
 			ck3.Ping(vx.Viewnum)
 			v, _ := ck1.Get()
+			fmt.Println("v.Viewnum:", v.Viewnum, "vx.Viewnum:", vx.Viewnum)
 			if v.Viewnum > vx.Viewnum {
 				break
 			}
