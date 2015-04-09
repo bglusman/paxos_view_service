@@ -40,10 +40,9 @@ type View struct {
 	Backup  string
 }
 
-
 func (v *View) PromoteBackup(newBackup string) {
   if v.Backup == "" || newBackup == v.Backup {
-    fmt.Println("WHOOPS PROMOTE")
+    fmt.Println("WHOOPS PROMOTED", v.Backup, "to primary, replacing with", newBackup)
   }
   v.Primary = v.Backup
   v.Backup = newBackup

@@ -26,7 +26,6 @@ func MakeClerk(me string, server string) *Clerk {
 	ck.server = server
 	return ck
 }
-
 //
 // call() sends an RPC to the rpcname handler on server srv
 // with arguments args, waits for the reply, and leaves the
